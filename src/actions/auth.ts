@@ -2,7 +2,15 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { signupSchema, loginSchema, forgotPasswordSchema } from "@/lib/validators/auth";
+
+async function getSiteOrigin() {
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}`;
+}
 
 export async function signUp(formData: {
   email: string;
@@ -19,7 +27,7 @@ export async function signUp(formData: {
       data: {
         full_name: validated.full_name,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${await getSiteOrigin()}/auth/callback`,
     },
   });
 
@@ -57,13 +65,22 @@ export async function resetPassword(formData: { email: string }) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(validated.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+    redirectTo: `${await getSiteOrigin()}/auth/callback?next=/reset-password`,
   });
 
   if (error) {
     return { error: error.message };
   }
 
+  return { success: true };
+}
+
+export async function updatePasswordAfterReset(data: { password: string }) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: data.password });
+  if (error) {
+    return { error: error.message };
+  }
   return { success: true };
 }
 

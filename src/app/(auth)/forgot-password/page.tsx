@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { resetPassword } from "@/actions/auth";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {
+  const searchParams = useSearchParams();
+  const expired = searchParams.get("expired") === "1";
+
   const [error, setError] = useState<string>("");
   const [sent, setSent] = useState(false);
 
@@ -46,6 +50,11 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="border border-neutral-700 bg-neutral-900 p-8">
+      {expired && (
+        <div className="mb-6 border border-yellow-600/40 bg-yellow-900/20 px-4 py-3 text-sm text-yellow-300">
+          that reset link has expired or already been used. request a new one below.
+        </div>
+      )}
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-white">
           reset your password
