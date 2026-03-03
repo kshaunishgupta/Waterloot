@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { resetPassword } from "@/actions/auth";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const searchParams = useSearchParams();
   const expired = searchParams.get("expired") === "1";
 
@@ -65,5 +65,19 @@ export default function ForgotPasswordPage() {
       </div>
       <ForgotPasswordForm onSubmit={handleSubmit} error={error} />
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="border border-neutral-700 bg-neutral-900 p-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-white">reset your password</h1>
+        </div>
+      </div>
+    }>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }
