@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     "/verify-email",
     "/forgot-password",
     "/reset-password",
+    "/confirm",
     "/auth/callback",
     "/browse",
     "/wanted",
