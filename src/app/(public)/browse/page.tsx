@@ -125,11 +125,68 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       page_number: page,
       page_size: pageSize,
     });
+
     if (rpcError) {
       console.error("[browse] search_listings RPC error:", rpcError.message, rpcError.code);
+
+      // Fallback: direct query (handles outdated/missing RPC function)
+      let fallback = supabase
+        .from("listings")
+        .select(`
+          id, title, description, price, condition,
+          images, status, isbn, book_title, book_author, book_edition, course_code,
+          seller_id, created_at, category_id,
+          seller:profiles!seller_id(full_name, avatar_url),
+          category:categories!category_id(name, slug)
+        `)
+        .eq("status", "active");
+
+      if (selectedSlugs.length === 1) {
+        const catId = allCategories.find((c) => c.slug === selectedSlugs[0])?.id;
+        if (catId) fallback = fallback.eq("category_id", catId);
+      }
+      if (params.q) fallback = fallback.ilike("title", `%${params.q}%`);
+      if (selectedConditions.length === 1) fallback = fallback.eq("condition", selectedConditions[0]);
+      if (params.min_price) fallback = fallback.gte("price", parseFloat(params.min_price));
+      if (params.max_price) fallback = fallback.lte("price", parseFloat(params.max_price));
+      if (dateAfter) fallback = fallback.gte("created_at", dateAfter);
+
+      const sortBy = params.sort || "newest";
+      if (sortBy === "price_asc") fallback = fallback.order("price", { ascending: true });
+      else if (sortBy === "price_desc") fallback = fallback.order("price", { ascending: false });
+      else if (sortBy === "oldest") fallback = fallback.order("created_at", { ascending: true });
+      else fallback = fallback.order("created_at", { ascending: false });
+
+      fallback = fallback.range((page - 1) * pageSize, page * pageSize - 1);
+
+      const { data: fallbackData } = await fallback;
+      listings = ((fallbackData || []) as any[]).map((l) => ({
+        id: l.id,
+        title: l.title,
+        description: l.description,
+        price: l.price,
+        condition: l.condition,
+        images: l.images,
+        status: l.status,
+        isbn: l.isbn,
+        book_title: l.book_title,
+        book_author: l.book_author,
+        book_edition: l.book_edition,
+        course_code: l.course_code,
+        seller_id: l.seller_id,
+        seller_name: (l.seller as any)?.full_name || "",
+        seller_avatar: (l.seller as any)?.avatar_url || null,
+        category_id: l.category_id,
+        category_name: (l.category as any)?.name || "",
+        category_slug: (l.category as any)?.slug || "",
+        created_at: l.created_at,
+        total_count: 0,
+      }));
+      totalCount = listings.length;
+    } else {
+      listings = (results || []) as SearchResult[];
+      totalCount = listings[0]?.total_count || 0;
     }
-    listings = (results || []) as SearchResult[];
-    totalCount = listings[0]?.total_count || 0;
   }
 
   const totalPages = Math.ceil(totalCount / pageSize);
