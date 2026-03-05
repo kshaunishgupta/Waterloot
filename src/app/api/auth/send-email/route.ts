@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM ?? "help@uwaterloot.ca";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://uwaterloot.ca";
-const HOOK_SECRET = process.env.SEND_EMAIL_HOOK_SECRET;
-
 export async function POST(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const FROM = process.env.EMAIL_FROM ?? "help@uwaterloot.ca";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://uwaterloot.ca";
+  const HOOK_SECRET = process.env.SEND_EMAIL_HOOK_SECRET;
+
   // Verify the request is from Supabase
   if (HOOK_SECRET) {
     const authHeader = req.headers.get("authorization");
