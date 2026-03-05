@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-neutral-900">
+      <h1 className="mb-6 text-2xl font-bold text-white">
         User Management
       </h1>
 
@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
           placeholder="Search users..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md rounded-lg border border-neutral-300 px-4 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="w-full max-w-md border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         />
       </div>
 
@@ -116,10 +116,10 @@ export default function AdminUsersPage() {
             ) : (
               filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-neutral-800">
-                  <td className="px-4 py-3 font-medium text-neutral-900">
+                  <td className="px-4 py-3 font-medium text-neutral-200">
                     {user.full_name}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">{user.email}</td>
+                  <td className="px-4 py-3 text-neutral-400">{user.email}</td>
                   <td className="px-4 py-3">
                     <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                       {user.role}

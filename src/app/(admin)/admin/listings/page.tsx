@@ -73,7 +73,7 @@ export default function AdminListingsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-neutral-900">
+      <h1 className="mb-6 text-2xl font-bold text-white">
         Listing Moderation
       </h1>
 
@@ -125,10 +125,10 @@ export default function AdminListingsPage() {
                       {listing.title}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="px-4 py-3 text-neutral-400">
                     {formatPrice(listing.price)}
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">
+                  <td className="px-4 py-3 text-neutral-400">
                     {listing.seller?.full_name || "Unknown"}
                   </td>
                   <td className="px-4 py-3">
