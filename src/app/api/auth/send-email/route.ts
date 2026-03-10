@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 export async function POST(req: NextRequest) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("[send-email hook] RESEND_API_KEY is not set");
+    return NextResponse.json({ error: "Email service not configured" }, { status: 500 });
+  }
+
+  const resend = new Resend(apiKey);
   const FROM = process.env.EMAIL_FROM ?? "help@uwaterloot.ca";
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://uwaterloot.ca";
   const HOOK_SECRET = process.env.SEND_EMAIL_HOOK_SECRET;
