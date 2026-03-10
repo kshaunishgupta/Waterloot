@@ -82,18 +82,13 @@ export function SignupForm({ onSubmit, error }: SignupFormProps) {
         <Input
           label="Email"
           type="email"
-          placeholder="you@uwaterloo.ca"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           error={fieldErrors.email}
           autoComplete="email"
           required
         />
-        {!fieldErrors.email && (
-          <p className="mt-1.5 text-xs text-gray-500">
-            Must be @uwaterloo.ca
-          </p>
-        )}
       </div>
 
       <Input

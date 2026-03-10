@@ -11,8 +11,7 @@ export default function VerifyEmailPage() {
         check your email
       </h1>
       <p className="mt-3 text-sm text-neutral-400">
-        we sent a verification link to your{" "}
-        <strong className="text-neutral-200">@uwaterloo.ca</strong> email address. click the link to
+        we sent a verification link to your email address. click the link to
         verify your account and start using waterloot.
       </p>
       <div className="mt-6 bg-neutral-800 p-4 text-left text-sm text-neutral-400">
@@ -21,7 +20,7 @@ export default function VerifyEmailPage() {
         </p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>Check your spam or junk folder</li>
-          <li>Make sure you entered your @uwaterloo.ca email correctly</li>
+          <li>Make sure you entered your email correctly</li>
           <li>
             Try{" "}
             <Link href="/signup" className="text-primary-600 hover:underline">

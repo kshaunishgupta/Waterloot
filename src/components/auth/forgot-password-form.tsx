@@ -61,7 +61,7 @@ export function ForgotPasswordForm({
         <Input
           label="Email"
           type="email"
-          placeholder="you@uwaterloo.ca"
+          placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           error={fieldErrors.email}

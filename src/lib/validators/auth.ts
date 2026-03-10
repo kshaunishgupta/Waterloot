@@ -1,13 +1,7 @@
 import { z } from "zod";
 
 export const signupSchema = z.object({
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .refine(
-      (email) => email.endsWith("@uwaterloo.ca"),
-      "You must use your @uwaterloo.ca email address"
-    ),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   full_name: z
     .string()
@@ -21,13 +15,7 @@ export const loginSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .refine(
-      (email) => email.endsWith("@uwaterloo.ca"),
-      "You must use your @uwaterloo.ca email address"
-    ),
+  email: z.string().email("Please enter a valid email address"),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;
