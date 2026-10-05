@@ -1,16 +1,53 @@
 # Waterloot
 
-A campus-exclusive peer-to-peer marketplace for University of Waterloo students. Built with Next.js, Supabase, and Tailwind CSS so students can buy and sell textbooks, furniture, sublets, and more with people they actually share a campus with.
+A campus-exclusive peer-to-peer marketplace for University of Waterloo students. Buy and sell textbooks, furniture, housing, electronics, and more with people you actually share a campus with.
 
-**Live:** [waterloot.ca](https://waterloot.ca)
+**Live at [waterloot.ca](https://waterloot.ca)**
 
 ---
 
-## What is it?
+## The Problem
 
-Waterloot requires a valid `@uwaterloo.ca` email to sign up. That one constraint replaces the trust problem that makes platforms like Facebook Marketplace feel like a gamble. Every user is a verified Waterloo student, full stop.
+Facebook Marketplace works everywhere—which is the problem. You're selling to strangers with no shared identity. Trust is earned through reviews, but that takes time and creates friction.
 
-**First week:** 50+ active users and around 20 live listings.
+Waterloot solves this with a simple constraint: **every user is a verified Waterloo student** (`@uwaterloo.ca` email required). No trust deficit. No reputation system overhead. Just students buying and selling to students.
+
+---
+
+## What You Can Do
+
+- **Browse by category**: textbooks, furniture, electronics, housing/sublets, and more
+- **List items easily**: ISBN auto-lookup for textbooks (Open Library API)
+- **Find what you want**: search, filter, save listings
+- **Connect safely**: seller emails only visible to signed-in users
+- **Rate sellers**: simple like/dislike system
+- **Post wanted ads**: looking for something? Post a budget and let sellers find you
+- **Report problems**: spam, scams, or inappropriate content—report it and admins handle it
+
+---
+
+## How It Works
+
+```
+┌─────────────────────────────────────┐
+│       Frontend (Next.js 15)         │
+│  - Drag-and-drop image upload      │
+│  - Real-time search & filters      │
+│  - Saved listings & wanted posts   │
+└────────────┬────────────────────────┘
+             │ Server Actions (Next.js)
+┌────────────▼────────────────────────┐
+│      Backend (Supabase)             │
+│  - Auth: @uwaterloo.ca verification │
+│  - RLS: trust at the database layer │
+│  - Storage: 6 photos per listing    │
+└─────────────────────────────────────┘
+```
+
+**Key architecture decisions:**
+- **Postgres RLS policies**: Access control happens in the database, not the app layer. A user can only see/modify their own listings and profile.
+- **Server actions**: All mutations run on the server. No sensitive logic in the browser.
+- **Supabase Storage**: Images stored directly, not in the database.
 
 ---
 
@@ -20,99 +57,12 @@ Waterloot requires a valid `@uwaterloo.ca` email to sign up. That one constraint
 |---|---|
 | Framework | Next.js 15 (App Router) |
 | Frontend | React 19, Tailwind CSS, Lucide Icons |
-| Backend / DB | Supabase (Postgres + RLS + Storage) |
-| Auth | Supabase Auth with @uwaterloo.ca email restriction |
-| Transactional Email | Resend |
+| Backend | Supabase (Postgres + RLS + Storage) |
+| Auth | Supabase Auth with `@uwaterloo.ca` email restriction |
+| Email | Resend (transactional email for reports/notifications) |
 | Deployment | Vercel |
-| Validation | Zod |
+| Validation | Zod (client & server) |
 | Maps | Leaflet / React Leaflet |
-
----
-
-## Features
-
-**Campus auth** — signup is locked to @uwaterloo.ca emails. Verification is handled through Supabase Auth with a custom email hook built on Resend.
-
-**Listings marketplace** — create, browse, filter, and search across categories like textbooks, electronics, furniture, housing, and more.
-
-**Textbook fields** — ISBN lookup via the Open Library API auto-fills the title, author, and edition so sellers don't have to type everything out.
-
-**Wanted posts** — post what you're looking for with an optional budget range. Other students can reach out to you directly.
-
-**Saved listings** — bookmark anything you're interested in and find it later.
-
-**Seller ratings** — a simple like/dislike system that shows an approval percentage on each seller profile.
-
-**Reporting** — report a listing or user from any page. Admins get an email notification and can handle it from the dashboard.
-
-**Admin dashboard** — ban/unban users, promote to admin, remove or restore listings, and resolve reports.
-
-**Image uploads** — up to 6 photos per listing, stored in Supabase Storage.
-
-**Contact flow** — seller emails are only visible to signed-in users. A modal lets buyers open Outlook directly or copy the address.
-
-**Grid and list views** — toggle between a photo grid and a compact list on both the browse and wanted pages.
-
----
-
-## Getting Started
-
-### Prerequisites
-
-Node.js 20 or higher, a Supabase project, and a Resend account for transactional email.
-
-### 1. Clone and install
-
-```bash
-git clone https://github.com/your-repo/waterloot.git
-cd waterloot
-npm install
-```
-
-### 2. Set up environment variables
-
-Create a `.env.local` file in the project root:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-# Optional but needed for transactional email and report notifications
-RESEND_API_KEY=your_resend_api_key
-EMAIL_FROM=noreply@yourdomain.com
-SEND_EMAIL_HOOK_SECRET=your_hook_secret
-```
-
-### 3. Set up the database
-
-Run the migrations in order from `supabase/migrations/`. If you have the Supabase CLI:
-
-```bash
-supabase db push
-supabase db seed
-```
-
-### 4. Configure Supabase Auth
-
-In your Supabase dashboard, set the Site URL and Redirect URLs to match `NEXT_PUBLIC_SITE_URL`.
-
-To plug in the custom email hook, register a webhook in Supabase pointing to:
-
-```
-POST https://your-domain.com/api/auth/send-email
-```
-
-with `SEND_EMAIL_HOOK_SECRET` as the bearer token.
-
-### 5. Run locally
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
@@ -120,47 +70,169 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```
 src/
-├── app/                  # Next.js App Router pages
-│   ├── (admin)/          # Admin dashboard — users, listings, reports
-│   ├── (auth)/           # Login, signup, password reset flows
-│   ├── (protected)/      # Pages that require a signed-in user
-│   ├── (public)/         # Publicly browsable pages
-│   └── api/              # Route handlers for ISBN lookup and the email hook
-├── actions/              # Server actions for listings, auth, ratings, etc.
+├── app/
+│   ├── (admin)/          # Admin dashboard: users, reports, moderation
+│   ├── (auth)/           # Sign up, login, password reset
+│   ├── (protected)/      # Pages that require sign-in (create listing, saved items)
+│   ├── (public)/         # Browse & search (no sign-in required)
+│   └── api/              # Route handlers (ISBN lookup, report email webhook)
+│
+├── actions/              # Server actions (9 files, 33 functions)
+│   ├── admin.ts          # Ban/unban users, promote to admin, remove listings
+│   ├── listings.ts       # Create, edit, delete listings
+│   ├── ratings.ts        # Like/dislike sellers
+│   ├── reports.ts        # Report listings/users
+│   ├── wanted.ts         # Create & manage wanted posts
+│   ├── saved.ts          # Bookmark listings
+│   ├── contact.ts        # Contact seller
+│   ├── auth.ts           # Sign up, password reset
+│   └── profile.ts        # Update profile, upload avatar
+│
 ├── components/
-│   ├── auth/             # Login, signup, and reset forms
-│   ├── layout/           # Navbar and footer
-│   ├── listings/         # Cards, forms, filters, and detail view
-│   ├── profile/          # Profile header with avatar upload
-│   ├── ratings/          # Seller like/dislike widget
-│   ├── settings/         # Change password form
-│   ├── ui/               # Shared primitives like Button, Input, Modal, Badge
-│   └── wanted/           # Wanted post cards, filters, and contact button
-├── hooks/                # useAuth and useDebounce
+│   ├── listings/         # Card, detail view, filter sidebar
+│   ├── wanted/           # Wanted post cards & filters
+│   ├── auth/             # Forms (login, signup, reset)
+│   ├── ui/               # Shared primitives (Button, Input, Modal, Badge)
+│   └── layout/           # Navbar, footer
+│
 ├── lib/
-│   ├── constants.ts      # Conditions, sort options, report reasons, limits
-│   ├── supabase/         # Browser, server, and admin Supabase clients
+│   ├── supabase/         # Browser, server, and admin clients
+│   ├── validators/       # Zod schemas for all data
 │   ├── types/            # TypeScript interfaces
-│   ├── utils.ts          # cn, formatPrice, formatDate, formatCondition
-│   └── validators/       # Zod schemas for auth, listings, wanted, profile
+│   ├── constants.ts      # Categories, sort options, report reasons
+│   └── utils.ts          # Helpers (formatting, filtering)
+│
 └── supabase/
-    ├── migrations/       # Ordered SQL migration files
+    ├── migrations/       # Ordered SQL migrations
     └── seed.sql          # Category seed data
 ```
 
 ---
 
-## Scripts
+## Getting Started
+
+### Prerequisites
+- Node.js 20+
+- A Supabase account (free tier works)
+- A Resend account (for report notifications, optional for local dev)
+
+### 1. Clone & Install
 
 ```bash
-npm run dev             # Start the local dev server
-npm run build           # Production build
-npm run lint            # ESLint
+git clone https://github.com/kshaunishgupta/waterloot.git
+cd waterloot
+npm install
+```
+
+### 2. Set up environment
+
+Create `.env.local`:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+RESEND_API_KEY=your_resend_key  # Optional: for report emails
+EMAIL_FROM=noreply@waterloot.ca
+SEND_EMAIL_HOOK_SECRET=your_secret
+```
+
+### 3. Set up the database
+
+```bash
+# Install Supabase CLI if you haven't
+npm install -g supabase
+
+# Push migrations
+supabase db push
+
+# Seed categories
+supabase db seed
+```
+
+### 4. Run locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Sign up with any `@uwaterloo.ca` email (verification is mocked in local dev).
+
+---
+
+## Key Features (Technical Details)
+
+**Campus-only auth**
+- Only `@uwaterloo.ca` emails can sign up
+- Verified via Supabase Auth + custom email hook (Resend)
+- Ban system: admins can ban users, which blocks them in Supabase Auth (`ban_duration: "876000h"`)
+
+**Admin dashboard**
+- View all users, listings, reports
+- Ban/unban users (blocks in auth layer)
+- Promote users to admin
+- Remove/restore listings
+- Mark reports as resolved
+
+**Seller ratings**
+- Simple like/dislike system per seller
+- Shows approval % on seller profile
+- Helps future buyers make trust decisions
+
+**Listings**
+- Support for 15+ categories
+- Up to 6 photos per listing (Supabase Storage)
+- Condition tracking (like new, good, fair, poor)
+- Search & multi-filter (category, price range, condition)
+- ISBN auto-lookup for textbooks (Open Library API)
+
+**Wanted posts**
+- Post what you're looking for + budget
+- Sellers can reach out directly
+- Saves as a bookmark so sellers don't lose it
+
+---
+
+## Deployment
+
+**Vercel** (current)
+```bash
+vercel deploy
+```
+
+The site is deployed at [waterloot.ca](https://waterloot.ca).
+
+**Custom deployment**
+- App runs on Node 20+
+- Requires environment variables (Supabase keys, Resend key)
+- Database must be Supabase (or Postgres with RLS)
+
+---
+
+## Development
+
+```bash
+npm run dev              # Start dev server
+npm run build            # Production build
+npm run lint             # ESLint
 npm run supabase:types  # Regenerate Supabase TypeScript types
 ```
 
 ---
 
-## Questions or feedback?
+## What's Next
 
-Reach out at [waterloothelp@gmail.com](mailto:waterloothelp@gmail.com). If you're a UWaterloo student, come make an account and drop a listing.
+- [ ] Messaging system (direct chat between buyers/sellers)
+- [ ] Reviews (beyond just seller ratings)
+- [ ] User verification (check UW student status via .pdf transcript)
+- [ ] Categories for co-op housing (group listings)
+- [ ] Mobile app (React Native)
+
+---
+
+## Questions?
+
+Reach out at [waterloothelp@gmail.com](mailto:waterloothelp@gmail.com) or open an issue on GitHub.
+
+If you're a UWaterloo student, [sign up and drop a listing](https://waterloot.ca).
